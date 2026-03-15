@@ -1,0 +1,20 @@
+.Navbar ul{
+        text-align: center;
+        list-style-type: none;
+        margin: 0;
+        background-color: rgb(150, 167, 0);
+        overflow: hidden;
+    }
+    .Navbar li{
+        float: left;
+        padding: 10px;
+        text-align: center;
+    }
+    .Navbar a{
+        color:rgb(54, 87, 6);
+        text-decoration: none;
+        display: block;
+        padding: 15px;
+        text-align: center;
+        background-color: rgba(107, 119, 0, 0.342);
+    }
