@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>My Movie List</title>
+
+<style>
+body{
+    font-family: "Poppins", sans-serif;
+    background-image: url("movieIcon.avif");
+    background-size: cover;
+    background-repeat: no-repeat;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container{
+    width: 350px;
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0px 10px 25px rgba(0,0,0,0.3);
+}
+
+.box{
+    background: rgb(255, 255, 255);
+    width: 300px;
+    margin: auto;
+    padding: 15px;
+    border: 3px solid rgb(0, 0, 0);
+}
+
+input, select{
+    width: 100%;
+    padding: 5px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    border-radius: 6px;
+    border: 1px solid #000000;
+}
+
+button{
+    background: #e63946;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+button:hover{
+    background: #c92f3c;
+}
+
+.star{
+    font-size: 22px;
+    cursor: pointer;
+    color: rgb(96, 96, 96);
+    transition: color 0.2s;
+}
+
+.star.gold{
+    color: gold;
+}
+
+.movie{
+    border: 2px solid gray;
+    margin-top: 10px;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.delete-btn{
+    background: #e63946;
+    color: white;
+    border: none;
+    padding: 2px 8px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.delete-btn:hover{
+    background: #c92f3c;
+}
+
+.movie-info{
+    display: flex;
+    flex-direction: column;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+
+<h2>Movie List</h2>
+
+Title:<br>
+<input id="title">
+
+Year:<br>
+<input id="year">
+
+Genre:<br>
+<select id="genre">
+<option>Action</option>
+<option>Comedy</option>
+<option>Drama</option>
+<option>Horror</option>
+</select>
+
+Rating:<br>
+<span class="star" data-value="1">★</span>
+<span class="star" data-value="2">★</span>
+<span class="star" data-value="3">★</span>
+<span class="star" data-value="4">★</span>
+<span class="star" data-value="5">★</span>
+
+<br><br>
+<button onclick="addMovie()">Add Movie</button>
+
+<h3>Movies</h3>
+<div id="list"></div>
+
+</div>
+
+<script>
+let rating = 0;
+const stars = document.querySelectorAll(".star");
+
+// function to update star colors for input
+function updateStars(num){
+    stars.forEach((star, i) => {
+        if(i < num) star.classList.add("gold");
+        else star.classList.remove("gold");
+    });
+}
+
+// hover effect for input stars
+stars.forEach((star, index) => {
+    star.addEventListener("mouseover", () => {
+        updateStars(index + 1);
+    });
+    star.addEventListener("mouseout", () => {
+        updateStars(rating);
+    });
+    star.addEventListener("click", () => {
+        rating = index + 1;
+        updateStars(rating);
+    });
+});
+
+function addMovie(){
+    const title = document.getElementById("title").value.trim();
+    const year = document.getElementById("year").value.trim();
+    const genre = document.getElementById("genre").value;
+
+    if(title === "" || year === "" || rating === 0){
+        alert("Please fill out all the necessary information!");
+        return;
+    }
+
+    const movie = { title, year, genre, rating };
+    let movies = JSON.parse(localStorage.getItem("movies"));
+    if(!movies) movies = [];
+    movies.push(movie);
+    localStorage.setItem("movies", JSON.stringify(movies));
+
+    document.getElementById("title").value = "";
+    document.getElementById("year").value = "";
+    rating = 0;
+    updateStars(0); // reset stars after adding
+    showMovies();
+}
+
+function deleteMovie(index){
+    let movies = JSON.parse(localStorage.getItem("movies"));
+    movies.splice(index, 1);
+    localStorage.setItem("movies", JSON.stringify(movies));
+    showMovies();
+}
+
+function showMovies(){
+    const list = document.getElementById("list");
+    list.innerHTML = "";
+    const movies = JSON.parse(localStorage.getItem("movies"));
+    if(!movies) return;
+
+    movies.forEach((movie, i) => {
+        const div = document.createElement("div");
+        div.className = "movie";
+
+        const movieInfo = document.createElement("div");
+        movieInfo.className = "movie-info";
+
+        const infoText = document.createElement("div");
+        infoText.textContent = `${movie.title} (${movie.year}) - ${movie.genre}`;
+        movieInfo.appendChild(infoText);
+
+        // star rating for movie
+        const starDiv = document.createElement("div");
+        for(let s = 0; s < 5; s++){
+            const star = document.createElement("span");
+            star.textContent = "★";
+            star.className = "star";
+            if(s < movie.rating) star.classList.add("gold");
+            starDiv.appendChild(star);
+        }
+        movieInfo.appendChild(starDiv);
+
+        // delete button
+        const delBtn = document.createElement("button");
+        delBtn.textContent = "Delete";
+        delBtn.className = "delete-btn";
+        delBtn.onclick = () => deleteMovie(i);
+
+        div.appendChild(movieInfo);
+        div.appendChild(delBtn);
+        list.appendChild(div);
+    });
+}
+
+// initial display
+showMovies();
+</script>
+
+</body>
+</html>
