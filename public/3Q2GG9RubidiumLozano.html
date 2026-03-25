@@ -210,15 +210,25 @@ function addMovie(){
     showMovies();
 }
 
-function deleteMovie(index){
+function deleteMovie(index) {
+    // ts asks for confirm
+    const confirmDelete = confirm("Are you sure you want to delete this movie?");
 
-    let movies = JSON.parse(localStorage.getItem("movies"));
+    if (confirmDelete) {
+        let movies = JSON.parse(localStorage.getItem("movies"));
 
-    movies.splice(index, 1);
+        movies.splice(index, 1);
 
-    localStorage.setItem("movies", JSON.stringify(movies));
+        localStorage.setItem("movies", JSON.stringify(movies));
 
-    showMovies();
+        showMovies();
+
+        
+        alert("Movie has been deleted successfully!");
+    } else {
+       
+        alert("Deletion of the movie, cancelled!");
+    }
 }
 
 function showMovies(){
