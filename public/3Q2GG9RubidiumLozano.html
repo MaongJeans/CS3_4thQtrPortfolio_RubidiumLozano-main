@@ -32,7 +32,7 @@ body{
     border: 3px solid rgb(0, 0, 0);
 }
 
-input, select{
+input, select, textarea{
     width: 100%;
     padding: 5px;
     margin-top: 5px;
@@ -69,22 +69,6 @@ button:hover{
     border: 2px solid gray;
     margin-top: 10px;
     padding: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.delete-btn{
-    background: #e63946;
-    color: white;
-    border: none;
-    padding: 2px 8px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.delete-btn:hover{
-    background: #c92f3c;
 }
 
 .movie-info{
@@ -156,42 +140,75 @@ stars.forEach((star, index) => {
 });
 
 function addMovie(){
+
     const title = document.getElementById("title").value.trim();
     const year = document.getElementById("year").value.trim();
     const genre = document.getElementById("genre").value;
 
     if(title === "" || year === "" || rating === 0){
+
         alert("Please fill out all the necessary information!");
         return;
+
     }
 
-    const movie = { title, year, genre, rating };
     let movies = JSON.parse(localStorage.getItem("movies"));
-    if(!movies) movies = [];
-    movies.push(movie);
+
+    if(!movies){
+        movies = [];
+    }
+
+    let existing = movies.find(function(m){
+        return m.title.toLowerCase() === title.toLowerCase() && m.year === year;
+    });
+
+    if(existing){
+
+        if(existing.ratings){
+            existing.ratings.push(rating);
+        } else {
+            existing.ratings = [existing.rating, rating];
+            delete existing.rating;
+        }
+
+    } else {
+
+        movies.push({
+            title: title,
+            year: year,
+            genre: genre,
+            ratings: [rating],
+            notes: ""
+        });
+
+    }
+
     localStorage.setItem("movies", JSON.stringify(movies));
 
     document.getElementById("title").value = "";
     document.getElementById("year").value = "";
-    rating = 0;
-    updateStars(0); // reset stars after adding
-    showMovies();
-}
 
-function deleteMovie(index){
-    let movies = JSON.parse(localStorage.getItem("movies"));
-    movies.splice(index, 1);
-    localStorage.setItem("movies", JSON.stringify(movies));
+    rating = 0;
+    updateStars(0);
+
     showMovies();
 }
 
 function showMovies(){
+
     const list = document.getElementById("list");
     list.innerHTML = "";
-    const movies = JSON.parse(localStorage.getItem("movies"));
-    if(!movies) return;
 
-    movies.forEach((movie, i) => {
+    const movies = JSON.parse(localStorage.getItem("movies"));
+
+    if(!movies){
+        return;
+    }
+
+    for(let i = 0; i < movies.length; i++){
+
+        const movie = movies[i];
+
         const div = document.createElement("div");
         div.className = "movie";
 
@@ -199,33 +216,70 @@ function showMovies(){
         movieInfo.className = "movie-info";
 
         const infoText = document.createElement("div");
-        infoText.textContent = `${movie.title} (${movie.year}) - ${movie.genre}`;
+        infoText.textContent = movie.title + " (" + movie.year + ") - " + movie.genre;
         movieInfo.appendChild(infoText);
 
-        // star rating for movie
+        let ratingsArray;
+
+        if(movie.ratings){
+            ratingsArray = movie.ratings;
+        } else {
+            ratingsArray = [movie.rating];
+        }
+
+        let total = 0;
+
+        for(let r = 0; r < ratingsArray.length; r++){
+            total += ratingsArray[r];
+        }
+
+        let avg = Math.round(total / ratingsArray.length);
+
         const starDiv = document.createElement("div");
+
         for(let s = 0; s < 5; s++){
+
             const star = document.createElement("span");
             star.textContent = "★";
             star.className = "star";
-            if(s < movie.rating) star.classList.add("gold");
+
+            if(s < avg){
+                star.classList.add("gold");
+            }
+
             starDiv.appendChild(star);
+
         }
+
         movieInfo.appendChild(starDiv);
 
-        // delete button
-        const delBtn = document.createElement("button");
-        delBtn.textContent = "Delete";
-        delBtn.className = "delete-btn";
-        delBtn.onclick = () => deleteMovie(i);
+        const noteInput = document.createElement("textarea");
+        noteInput.placeholder = "Add notes here! (or not...)";
+
+        if(movie.notes){
+            noteInput.value = movie.notes;
+        } else {
+            noteInput.value = "";
+        }
+
+        noteInput.addEventListener("change", function(){
+
+            let movies = JSON.parse(localStorage.getItem("movies"));
+
+            movies[i].notes = noteInput.value;
+
+            localStorage.setItem("movies", JSON.stringify(movies));
+
+        });
+
+        movieInfo.appendChild(noteInput);
 
         div.appendChild(movieInfo);
-        div.appendChild(delBtn);
         list.appendChild(div);
-    });
+
+    }
 }
 
-// initial display
 showMovies();
 </script>
 
