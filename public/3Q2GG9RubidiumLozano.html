@@ -69,6 +69,22 @@ button:hover{
     border: 2px solid gray;
     margin-top: 10px;
     padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.delete-btn{
+    background: #e63946;
+    color: white;
+    border: none;
+    padding: 2px 8px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.delete-btn:hover{
+    background: #c92f3c;
 }
 
 .movie-info{
@@ -194,6 +210,17 @@ function addMovie(){
     showMovies();
 }
 
+function deleteMovie(index){
+
+    let movies = JSON.parse(localStorage.getItem("movies"));
+
+    movies.splice(index, 1);
+
+    localStorage.setItem("movies", JSON.stringify(movies));
+
+    showMovies();
+}
+
 function showMovies(){
 
     const list = document.getElementById("list");
@@ -254,7 +281,7 @@ function showMovies(){
         movieInfo.appendChild(starDiv);
 
         const noteInput = document.createElement("textarea");
-        noteInput.placeholder = "Add notes here! (or not...)";
+        noteInput.placeholder = "Add notes...";
 
         if(movie.notes){
             noteInput.value = movie.notes;
@@ -274,7 +301,18 @@ function showMovies(){
 
         movieInfo.appendChild(noteInput);
 
+        // ✅ delete button added back
+        const delBtn = document.createElement("button");
+        delBtn.textContent = "Delete";
+        delBtn.className = "delete-btn";
+
+        delBtn.onclick = function(){
+            deleteMovie(i);
+        };
+
         div.appendChild(movieInfo);
+        div.appendChild(delBtn);
+
         list.appendChild(div);
 
     }
